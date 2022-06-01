@@ -23,23 +23,38 @@ router.get("/", async (req, res) => {
 
 //get book by ID
 router.get("/:id", async (req, res) => {
-  console.log("req.params.id: ", req.params.id);
   const id = req.params.id;
   const result = await db.query(`SELECT * FROM books WHERE id = ${id};`);
-  console.log("RESULT: ", result.rows[0]);
   const book = result.rows[0];
   res.json({ book: book });
 });
 
 //post books
 router.post("/", async (req, res) => {
-  console.log("REQ.BODY: ", req.body);
-
   const result = await db.query(
     `INSERT INTO books (title, type, author, topic, publicationDate, pages) 
     VALUES ('${req.body.title}', '${req.body.type}', '${req.body.author}', '${req.body.topic}', '${req.body.publicationDate}', ${req.body.pages} ) returning *`
   );
   res.json({ book: result.rows[0] });
+});
+
+//update books by ID
+router.put("/:id", async (req, res) => {
+  const id = req.params.id;
+  const result = await db.query(
+    `UPDATE books SET title = '${req.body.title}', type = '${req.body.type}', author = '${req.body.author}', topic = '${req.body.topic}', publicationDate = '${req.body.publicationDate}' WHERE id = '${id}' RETURNING * `
+  );
+  res.json({ book: result.rows[0] });
+});
+
+//delete books by ID
+router.delete("/:id", async (req, res) => {
+  const id = req.params.id;
+  const result = await db.query(
+    `DELETE FROM books WHERE id = ${id} RETURNING * `
+  );
+  const book = result.rows[0];
+  res.json({ book: book });
 });
 
 module.exports = router;
